@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SensorI2CAdressChange", "Se
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkOnly", "NetworkOnly\NetworkOnly.vcxproj", "{DB102B90-9279-4404-BE13-B50B8913FA8C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Timer", "Timer\Timer.vcxproj", "{1ABC130B-A397-4003-BA63-0173F9E87CD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -27,6 +29,10 @@ Global
 		{DB102B90-9279-4404-BE13-B50B8913FA8C}.Debug|x86.Build.0 = Debug|Win32
 		{DB102B90-9279-4404-BE13-B50B8913FA8C}.Release|x86.ActiveCfg = Release|Win32
 		{DB102B90-9279-4404-BE13-B50B8913FA8C}.Release|x86.Build.0 = Release|Win32
+		{1ABC130B-A397-4003-BA63-0173F9E87CD2}.Debug|x86.ActiveCfg = Debug|Win32
+		{1ABC130B-A397-4003-BA63-0173F9E87CD2}.Debug|x86.Build.0 = Debug|Win32
+		{1ABC130B-A397-4003-BA63-0173F9E87CD2}.Release|x86.ActiveCfg = Release|Win32
+		{1ABC130B-A397-4003-BA63-0173F9E87CD2}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

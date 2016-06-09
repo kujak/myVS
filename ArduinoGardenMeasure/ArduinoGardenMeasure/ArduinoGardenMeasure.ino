@@ -3,6 +3,7 @@
  Created:	6/7/2016 4:24:28 PM
  Author:	Kujak
 */
+#include <TimerOne.h>
 #include <SPI.h>
 #include <Ethernet.h>
 #include <Wire.h>
@@ -19,20 +20,27 @@ int moist;
 int temp;
 int light;
 
+int alle_x_sekunden = 30;
+
 // the setup function runs once when you press reset or power the board
 void setup() 
 {
 	Serial.begin(9600);
 	setupI2C();
 	setupEthernet();
+	setupTimer();	
 }
 
-// the loop function runs over and over again until power down or reset
+void setupTimer()
+{
+	Timer1.initialize(alle_x_sekunden * 1000000);
+	Timer1.attachInterrupt(getI2C);
+	Timer1.start();
+}
 void setupI2C()
 {
 	Wire.begin();
-	I2CwriteRegister8bit(sensor01, 6); //reset
-	getI2C();
+	I2CwriteRegister8bit(sensor01, 6); //reset	
 	getI2C();
 }
 
@@ -61,6 +69,7 @@ void loop()
 		while (client.connected())
 		{
 			
+			noInterrupts();
 			// client.available() gibt die Anzahl der Zeichen zurück, die zum Lesen
 			// verfügbar sind
 			if (client.available())
@@ -105,6 +114,7 @@ void loop()
 				}
 			}
 		}
+		interrupts();
 		// Kleine Pause
 		delay(1);
 		// Verbindung schliessen
@@ -115,7 +125,7 @@ void loop()
 }
 
 
-void getI2C()
+void getI2C(void)
 {
 	int I2Cmoist = I2CreadRegister16bit(sensor01, 0);
 	int I2Ctemp = I2CreadRegister16bit(sensor01, 5);
