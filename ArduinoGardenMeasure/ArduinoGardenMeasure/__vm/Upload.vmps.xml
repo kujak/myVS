@@ -9,24 +9,24 @@
       <VCCodeMacros />
     </VCCodeModel>
     <BreakPoints>
-      <BreakPoint Index="1" Name="ArduinoGardenMeasure.ino, line 108" Id="cbbade5b-83b9-49ff-99d0-2d8d491bd704" Enabled="1" Message="" MessageTextType="2" PreProcessedMessage="" Condition="" ConditionType="1" CurrentHits="0" File="n:\#tools\#git_repo\arduinogardenmeasure\arduinogardenmeasure\arduinogardenmeasure.ino" FileLine="108" FileColumn="1" FunctionName="getI2C(EthernetClient client)" FunctionLineOffset="2" FunctionColumnOffset="1" HitCountTarget="1" HitCountType="1" Language="C++" LocationType="3" Tag="&lt;vmbp Id='8c498001-a668-4b10-ae3d-276434a87a9a'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
-        <Source>101			Serial.println("");
-102		}
-103	}
-104	
-105	
-106	void getI2C(EthernetClient client)
-107	{
---&gt;108		int moisture = I2CreadRegister16bit(sensor01, 0);
-109		int temp = I2CreadRegister16bit(sensor01, 5);
-110		I2CwriteRegister8bit(sensor01, 3);
-111		int light = I2CreadRegister16bit(sensor01, 4);
-112	
-113		if (client)
-114		{
-115			client.print("Temperatur: &lt;b&gt;");
-116			client.print(temp);
-117			client.print("&lt;/b&gt;Humidity: &lt;b&gt;");
+      <BreakPoint Index="1" Name="ArduinoGardenMeasure.ino, line 120" Id="38309457-a495-4b18-90e5-d96698520045" Enabled="1" Message="" MessageTextType="2" PreProcessedMessage="" Condition="" ConditionType="1" CurrentHits="0" File="n:\#tools\#git_repo\arduinogardenmeasure\arduinogardenmeasure\arduinogardenmeasure.ino" FileLine="120" FileColumn="1" FunctionName="getI2C()" FunctionLineOffset="2" FunctionColumnOffset="1" HitCountTarget="1" HitCountType="1" Language="C++" LocationType="3" Tag="&lt;vmbp Id='377eccc2-ccbc-4128-913e-efa1a69166f5'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
+        <Source>113			Serial.println("");
+114		}
+115	}
+116	
+117	
+118	void getI2C()
+119	{
+--&gt;120		int I2Cmoist = I2CreadRegister16bit(sensor01, 0);
+121		int I2Ctemp = I2CreadRegister16bit(sensor01, 5);
+122		I2CwriteRegister8bit(sensor01, 3);
+123		int I2Clight = I2CreadRegister16bit(sensor01, 4);
+124			
+125		Serial.print("Moist: ");
+126		Serial.print(I2Cmoist); //read capacitance register
+127		Serial.print(", Temp: ");
+128		Serial.print(I2Ctemp); //temperature register
+129		Serial.print(", Light: ");
 </Source>
       </BreakPoint>
     </BreakPoints>

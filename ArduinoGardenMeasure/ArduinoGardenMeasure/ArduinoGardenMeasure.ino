@@ -3,20 +3,21 @@
  Created:	6/7/2016 4:24:28 PM
  Author:	Kujak
 */
-#include <Wire.h>
 #include <SPI.h>
 #include <Ethernet.h>
+#include <Wire.h>
 
 #define sensor01 0x20
 
 // Hier die MAC Adresse des Shields eingeben (Aufkleber auf Rückseite)
 byte mac[] = {0x90, 0xA2, 0xDA, 0x00, 0xFB, 0x80 };
-
 // Eine IP im lokalen Netzwerk angeben
 IPAddress ip(192, 168, 69, 190);
-
 // Ethernet Library als Server initialisieren verwendet die obige IP, Port ist per default 80
 EthernetServer server(80);
+int moist;
+int temp;
+int light;
 
 // the setup function runs once when you press reset or power the board
 void setup() 
@@ -31,6 +32,8 @@ void setupI2C()
 {
 	Wire.begin();
 	I2CwriteRegister8bit(sensor01, 6); //reset
+	getI2C();
+	getI2C();
 }
 
 void setupEthernet()
@@ -53,9 +56,11 @@ void loop()
 		// Jetzt solange Zeichen lesen, bis eine leere Zeile empfangen wurde
 		// HTTP Requests enden immer mit einer leeren Zeile 
 		boolean currentLineIsBlank = true;
-		// Solange Client verbunden 
+		
+			// Solange Client verbunden 		
 		while (client.connected())
 		{
+			
 			// client.available() gibt die Anzahl der Zeichen zurück, die zum Lesen
 			// verfügbar sind
 			if (client.available())
@@ -72,12 +77,19 @@ void loop()
 					client.println("HTTP/1.1 200 OK");
 					client.println("Content-Type: text/html");
 					client.println("Connection: close"); // Verbindung wird nach Antwort beendet
-					client.println("Refresh: 5"); // Seite alle 25 Sekunden neu abfragen
+					client.println("Refresh: 10"); // Seite alle 25 Sekunden neu abfragen
 					client.println();
 					// Ab hier berginnt der HTML-Code, der an den Browser geschickt wird
 					client.println("<!DOCTYPE HTML>");
 					client.println("<html>");
-					getI2C(client);
+					client.print("Temperatur: ");
+					client.print(temp);
+					client.println("<br>Humidity: ");
+					client.print(moist);
+					client.println("<br>Light: ");
+					client.print(light);					
+					//client.print("test");
+					//getI2C(client);
 					client.println("</html>");
 					break;
 				}
@@ -103,31 +115,26 @@ void loop()
 }
 
 
-void getI2C(EthernetClient client)
+void getI2C()
 {
-	int moisture = I2CreadRegister16bit(sensor01, 0);
-	int temp = I2CreadRegister16bit(sensor01, 5);
+	int I2Cmoist = I2CreadRegister16bit(sensor01, 0);
+	int I2Ctemp = I2CreadRegister16bit(sensor01, 5);
 	I2CwriteRegister8bit(sensor01, 3);
-	int light = I2CreadRegister16bit(sensor01, 4);
+	int I2Clight = I2CreadRegister16bit(sensor01, 4);
+		
+	Serial.print("Moist: ");
+	Serial.print(I2Cmoist); //read capacitance register
+	Serial.print(", Temp: ");
+	Serial.print(I2Ctemp); //temperature register
+	Serial.print(", Light: ");
+	Serial.println(I2Clight); //read light register 65535 = finster	
 
-	if (client)
-	{
-		client.print("Temperatur: <b>");
-		client.print(temp);
-		client.print("</b>Humidity: <b>");
-		client.print(moisture);
-		client.print("</b>Light: <b>");
-		client.print(light);
-		client.println("</b><br />");
-	}
-	
-		Serial.print("Moist: ");
-		Serial.print(moisture); //read capacitance register
-		Serial.print(", Temp: ");
-		Serial.print(temp); //temperature register
-		Serial.print(", Light: ");
-		Serial.println(light); //read light register 65535 = finster
-	
+	if (I2Cmoist)
+		moist = I2Cmoist;
+	if (I2Ctemp)
+		temp = I2Ctemp;
+	if (I2Clight)
+		light = I2Clight;
 }
 
 void I2CwriteRegister8bit(int addr, int value) 
