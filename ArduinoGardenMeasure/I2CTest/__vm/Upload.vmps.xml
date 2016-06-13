@@ -32,46 +32,6 @@
           <MessageVariable Name="millis()" Index="1" />
         </MessageVariables>
       </BreakPoint>
-      <BreakPoint Index="2" Name="I2CTest.ino, line 29" Id="e9c552ee-2b96-4131-9b48-4ab768bf37c1" Enabled="1" Message="" MessageTextType="2" PreProcessedMessage="" Condition="" ConditionType="1" CurrentHits="0" File="n:\#tools\#git_repo\arduinogardenmeasure\i2ctest\i2ctest.ino" FileLine="29" FileColumn="1" FunctionName="loop(void)" FunctionLineOffset="3" FunctionColumnOffset="1" HitCountTarget="1" HitCountType="1" Language="C++" LocationType="3" Tag="&lt;vmbp Id='e9c552ee-2b96-4131-9b48-4ab768bf37c1'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
-        <Source>22		Serial.begin(9600);
-23		Serial.println("setup");
-24	}
-25	
-26	void loop(void)
-27	{
-28		Serial.println("loop");
---&gt;29		I2Cmoist = moist;
-30		I2Ctemp = temp;
-31		I2Clight = light;
-32	
-33		Serial.print("moist = ");
-34		Serial.println(I2Cmoist);
-35		delay(1000);
-36		getI2C();
-37	}
-38	void getI2C(void)
-</Source>
-      </BreakPoint>
-      <BreakPoint Index="3" Name="I2CTest.ino, line 41" Id="fc82c820-0f89-4543-9b28-5f08c4a41dbd" Enabled="1" Message="" MessageTextType="2" PreProcessedMessage="" Condition="" ConditionType="1" CurrentHits="0" File="n:\#tools\#git_repo\arduinogardenmeasure\i2ctest\i2ctest.ino" FileLine="41" FileColumn="1" FunctionName="getI2C(void)" FunctionLineOffset="3" FunctionColumnOffset="1" HitCountTarget="1" HitCountType="1" Language="C++" LocationType="3" Tag="&lt;vmbp Id='8875df33-3e5b-496d-b170-fcfd29137638'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
-        <Source>34		Serial.println(I2Cmoist);
-35		delay(1000);
-36		getI2C();
-37	}
-38	void getI2C(void)
-39	{
-40		Serial.println("getI2C");
---&gt;41		int moist = I2CreadRegister16bit(sensor01, 0);
-42		//	int temp = I2CreadRegister16bit(sensor01, 5);
-43		//	I2CwriteRegister8bit(sensor01, 3);
-44		//	int light = I2CreadRegister16bit(sensor01, 4);
-45	}
-46	
-47	void I2CwriteRegister8bit(int addr, int value)
-48	{
-49		Wire.beginTransmission(addr);
-50		Wire.write(value);
-</Source>
-      </BreakPoint>
     </BreakPoints>
   </Program>
 </VisualMicro>

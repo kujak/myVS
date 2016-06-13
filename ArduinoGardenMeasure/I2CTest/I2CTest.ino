@@ -11,11 +11,12 @@
 volatile int moist;
 volatile int temp;
 volatile int light;
+
 int I2Cmoist;
 int I2Ctemp;
 int I2Clight;
 
-void setup(void)
+void setup()
 {
 	Wire.begin();
 	I2CwriteRegister8bit(sensor01, 6); //reset	
@@ -23,7 +24,7 @@ void setup(void)
 	Serial.println("setup");
 }
 
-void loop(void)
+void loop()
 {
 	Serial.println("loop");
 	I2Cmoist = moist;
@@ -39,9 +40,9 @@ void getI2C(void)
 {
 	Serial.println("getI2C");
 	int moist = I2CreadRegister16bit(sensor01, 0);
-	//	int temp = I2CreadRegister16bit(sensor01, 5);
-	//	I2CwriteRegister8bit(sensor01, 3);
-	//	int light = I2CreadRegister16bit(sensor01, 4);
+	int temp = I2CreadRegister16bit(sensor01, 5);
+	I2CwriteRegister8bit(sensor01, 3);
+	int light = I2CreadRegister16bit(sensor01, 4);
 }
 
 void I2CwriteRegister8bit(int addr, int value)
