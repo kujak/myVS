@@ -5,12 +5,14 @@
 */
 
 #include "I2CSensorCap.h"
+#include <Ethernet.h>
 #include <SD.h>
 #include <TimerOne.h>
 #include <Wire.h>
 
 #define sensor1 0x20
-#define seconds 10
+#define sensor2 0x21
+#define seconds 60
 
 const int chipSelect = 4;
 
@@ -19,12 +21,22 @@ volatile boolean I2Cstart;
 int I2Cmoist;
 int I2Ctemp;
 int I2Clight;
+
 int	I2CSensor = 1;
 
+String latestData;
+
 boolean SDOK;
-boolean firstRun = true;
 
 I2CSensorCap I2Csensor1 = I2CSensorCap(sensor1);
+I2CSensorCap I2Csensor2 = I2CSensorCap(sensor2);
+
+// Hier die MAC Adresse des Shields eingeben (Aufkleber auf Rückseite)
+byte mac[] = { 0x90, 0xA2, 0xDA, 0x00, 0xFB, 0x80 };
+// Eine IP im lokalen Netzwerk angeben
+IPAddress ip(192, 168, 69, 190);
+// Ethernet Library als Server initialisieren verwendet die obige IP, Port ist per default 80
+EthernetServer server(80);
 
 void setup()
 {
@@ -34,9 +46,10 @@ void setup()
 	Wire.begin();
 
 	Serial.begin(9600);
-	Serial.println("setup");
-
+	Serial.println("setup");	
+	
 	I2Csensor1.begin();
+	setupEthernet();
 
 	if (!SD.begin(chipSelect))
 	{
@@ -50,16 +63,76 @@ void setup()
 		Serial.println("card initialized.");
 	}
 }
-
+void setupEthernet()
+{
+	// Ethernet Verbindung und Server starten
+	Ethernet.begin(mac, ip);
+	server.begin();
+	Serial.print("Server gestartet. IP: ");
+	// IP des Arduino-Servers ausgeben
+	Serial.println(Ethernet.localIP());
+}
 void loop()
 {
-	if (I2Cstart)
+	if (I2Cstart) // Interrupt holt die I2C Daten
 	{
-		SDcreateOutput(I2Csensor1.getValues());
+		latestData = I2Csensor1.getValues();
+		SDcreateOutput(latestData);
+		I2Cstart = false;
 	}
 
-	Serial.println("Loop");
-	delay(1000);	
+	EthernetClient client = server.available();
+
+	if (client)
+	{
+		ClientOutput(client);
+		client.stop();
+		Serial.println("client disconnected");
+	}
+}
+void ClientOutput(EthernetClient _client)
+{
+	Serial.println("client connected");
+	// an http request ends with a blank line
+	boolean currentLineIsBlank = true;
+
+	while (_client.connected())
+	{		
+		if (_client.available())
+		{
+			char c = _client.read();
+			// if you've gotten to the end of the line (received a newline
+			// character) and the line is blank, the http request has ended,
+			// so you can send a reply
+			if (c == '\n' && currentLineIsBlank)
+			{
+				// send a standard http response header
+				_client.println("HTTP/1.1 200 OK");
+				_client.println("Content-Type: text/html");
+				_client.println("Connection: close");  // the connection will be closed after completion of the response				
+				_client.println("Refresh: 5");  // refresh the page automatically every 5 sec
+				_client.println();
+				_client.println("<!DOCTYPE HTML>");
+				_client.println("<html> <body>");
+			    _client.println(latestData);
+				_client.println("</body> </html>");
+				break;
+			}
+			if (c == '\n')
+			{
+				// you're starting a new line
+				currentLineIsBlank = true;
+			}
+			else if (c != '\r')
+			{
+				// you've gotten a character on the current line
+				currentLineIsBlank = false;
+			}
+		}
+	}
+
+	// give the web browser time to receive the data
+	delay(1);	
 }
 void SDcreateOutput(String _dataString)
 {
