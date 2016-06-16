@@ -12,11 +12,11 @@
 #define sensor2 0x21
 #define sensor3 0x22
 #define sensor4 0x23
-#define seconds 2
+#define seconds 5
 
 const int chipSelect = 4;
 
-volatile boolean startI2C;
+volatile boolean I2Cstart;
 
 int I2Cmoist;
 int I2Ctemp;
@@ -25,52 +25,59 @@ int	I2CSensor = 1;
 
 String dataString = "";
 
-int moist[4];
-int temp[4];
-int light[4];
+int ArrayMoist[4];
+int ArrayTemp[4];
+int ArrayLight[4];
 
-boolean first = true;
+boolean SDOK;
+boolean firstRun = true;
 
-int humiSensor[4] = { sensor1, sensor2, sensor3, sensor4 };
+int I2ChumiSensor[4] = { sensor1, sensor2, sensor3, sensor4 };
 
 void setup()
 {
 	Timer1.initialize(seconds*1000000);
-	Timer1.attachInterrupt(doI2C);	
+	Timer1.attachInterrupt(I2CdoScan);	
 
 	Wire.begin();
 
 	Serial.begin(9600);
 	Serial.println("setup");
+
 	if (!SD.begin(chipSelect)) 
 	{
 		Serial.println("Card failed, or not present");
 		// don't do anything more:
 		return;
 	}
-	Serial.println("card initialized.");
+	else
+	{
+		SDOK = true;
+		Serial.println("card initialized.");
+	}
 }
 void loop()
 {	
-	if (first)
+	if (firstRun)
 	{
 		for (int i = 1; i <= I2CSensor; i++)
 		{
-			Wire.beginTransmission(humiSensor[i]);
+			Wire.beginTransmission(I2ChumiSensor[i]);
 			if (Wire.endTransmission()) 
 			{ 
-				I2CwriteRegister8bit(humiSensor[i], 6); 
+				I2CwriteRegister8bit(I2ChumiSensor[i], 6); 
 			}
 		}
 
-		first = false;
+		firstRun = false;
 	}
 
-	if (startI2C)
+	if (I2Cstart)
 	{
-		getI2C(humiSensor[I2CSensor]);
-		startI2C = false;
+		I2CgetValues(I2ChumiSensor[I2CSensor]);
+		I2Cstart = false;
 		I2CSensor++;
+
 		if (I2CSensor > 2)	
 		{ 
 			I2CSensor = 0;	
@@ -78,23 +85,37 @@ void loop()
 	}
 
 	noInterrupts();
-	moist[I2CSensor] = I2Cmoist;
-	temp[I2CSensor]  = I2Ctemp;
-	light[I2CSensor] = I2Clight;
+	ArrayMoist[I2CSensor] = I2Cmoist;
+	ArrayTemp[I2CSensor]  = I2Ctemp;
+	ArrayLight[I2CSensor] = I2Clight;
 	interrupts();
 
 	delay(1000);
 
-	output(moist[I2CSensor],temp[I2CSensor],light[I2CSensor]);
+	SDcreateOutput(ArrayMoist[I2CSensor],ArrayTemp[I2CSensor],ArrayLight[I2CSensor]);
 }
-void output(int _moist,int _temp, int _light)
+void SDcreateOutput(int _moist,int _temp, int _light)
 {
-	Serial.print("Sensor : "); Serial.print(I2CSensor);
-	Serial.print(" --> Moist "); Serial.print(_moist);
-	Serial.print(", Temp "); Serial.print(_temp);
-	Serial.print(", Light "); Serial.println(_light);
+	//dataString = "";
+	//dataString = "Sensor : ";    dataString += I2CSensor;
+	//dataString += " --> Moist "; dataString += _moist;
+	//dataString += ", Temp ";     dataString += _temp;
+	//dataString += ", Light ";    dataString += _light;
+
+	dataString = "";
+	dataString = "Sensor : ";    dataString += I2CSensor;
+	dataString += " --> Moist "; dataString += _moist;
+	dataString += ", Temp ";     dataString += _temp;
+	dataString += ", Light ";    dataString += _light;
+
+	if (SDOK)
+	{
+		SDwriteTo();
+	}
+	
+	Serial.println(dataString);
 }
-void write2SD()
+void SDwriteTo()
 {
 	File dataFile = SD.open("datalog.txt", FILE_WRITE);
 
@@ -102,9 +123,7 @@ void write2SD()
 	if (dataFile) 
 	{
 		dataFile.println(dataString);
-		dataFile.close();
-		// print to the serial port too:
-		Serial.println(dataString);
+		dataFile.close();				
 	}
 	// if the file isn't open, pop up an error:
 	else 
@@ -112,11 +131,11 @@ void write2SD()
 		Serial.println("error opening datalog.txt");
 	}
 }
-void doI2C()
+void I2CdoScan()
 {
-	startI2C = true;
+	I2Cstart = true;
 }
-void getI2C(uint8_t _addr)
+void I2CgetValues(uint8_t _addr)
 {
 	I2Cmoist = I2CreadRegister16bit(_addr, 0);
 	I2Ctemp  = I2CreadRegister16bit(_addr, 5);
