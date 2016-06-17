@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "I2CTest", "I2CTest\I2CTest.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "I2CScanWriteSDWeb", "I2CScanWriteSDWeb\I2CScanWriteSDWeb.vcxproj", "{2E03568E-673C-4F41-8E0C-ABAF977C02BB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "I2CBarometer", "I2CBarometer\I2CBarometer.vcxproj", "{FFF827CC-04F4-4C0A-ABA8-9EE83327BCDF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -51,6 +53,10 @@ Global
 		{2E03568E-673C-4F41-8E0C-ABAF977C02BB}.Debug|x86.Build.0 = Debug|Win32
 		{2E03568E-673C-4F41-8E0C-ABAF977C02BB}.Release|x86.ActiveCfg = Release|Win32
 		{2E03568E-673C-4F41-8E0C-ABAF977C02BB}.Release|x86.Build.0 = Release|Win32
+		{FFF827CC-04F4-4C0A-ABA8-9EE83327BCDF}.Debug|x86.ActiveCfg = Debug|Win32
+		{FFF827CC-04F4-4C0A-ABA8-9EE83327BCDF}.Debug|x86.Build.0 = Debug|Win32
+		{FFF827CC-04F4-4C0A-ABA8-9EE83327BCDF}.Release|x86.ActiveCfg = Release|Win32
+		{FFF827CC-04F4-4C0A-ABA8-9EE83327BCDF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

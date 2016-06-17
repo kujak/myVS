@@ -12,7 +12,6 @@
 #define _VSARDUINO_H_
 #define __AVR_ATmega328p__
 #define __AVR_ATmega328P__
-#define _VMDEBUG 1
 #define F_CPU 16000000L
 #define ARDUINO 10609
 #define ARDUINO_AVR_UNO
@@ -51,7 +50,5 @@ extern "C" void __cxa_pure_virtual() {;}
 #define F(string_literal) ((const PROGMEM char *)(string_literal))
 #undef PSTR
 #define PSTR(string_literal) ((const PROGMEM char *)(string_literal))")
-#include <I2CScanWriteSDWeb.ino>
-#include <I2CSensorCap.cpp>
-#include <I2CSensorCap.h>
+#include <I2CBarometer.ino>
 #endif

@@ -12,21 +12,20 @@
 
 #define sensor1 0x20
 #define sensor2 0x21
+
 #define seconds 60
 
 const int chipSelect = 4;
 
 volatile boolean I2Cstart;
 
-int I2Cmoist;
-int I2Ctemp;
-int I2Clight;
-
 int	I2CSensor = 1;
+int I2CSensorcur = 1;
 
 String latestData;
 
 boolean SDOK;
+boolean I2CsensorActive[2];
 
 I2CSensorCap I2Csensor1 = I2CSensorCap(sensor1);
 I2CSensorCap I2Csensor2 = I2CSensorCap(sensor2);
@@ -40,35 +39,49 @@ EthernetServer server(80);
 
 void setup()
 {
+	Serial.println(".setup");
+	Serial.begin(9600);	
+
+	// init Interrupt Timer zum Auslesen der Werte
 	Timer1.initialize(seconds * 1000000);
 	Timer1.attachInterrupt(I2CdoScan);
-	
+
+	// I2C Kommunikation starten
 	Wire.begin();
 
-	Serial.begin(9600);
-	Serial.println("setup");	
-	
-	I2Csensor1.begin();
+	setupI2C();
 	setupEthernet();
-
+	setupSDCard();	
+}
+void setupI2C()
+{	
+	Serial.println(".- setupI2C");
+	// Sensor 1 starten
+	I2Csensor1.begin();
+}
+void setupSDCard()
+{
+	Serial.println(".- setupSDCard");
+	// SD Karte initialisieren bzw als inaktiv markieren
 	if (!SD.begin(chipSelect))
 	{
-		Serial.println("Card failed, or not present");
+		Serial.println(".-- Card failed, or not present");
 		// don't do anything more:
 		return;
 	}
 	else
 	{
 		SDOK = true;
-		Serial.println("card initialized.");
+		Serial.println(".-- card initialized.");
 	}
 }
 void setupEthernet()
 {
+	Serial.println(".- setupEthernet");
 	// Ethernet Verbindung und Server starten
 	Ethernet.begin(mac, ip);
 	server.begin();
-	Serial.print("Server gestartet. IP: ");
+	Serial.print(".-- Server gestartet. IP: ");
 	// IP des Arduino-Servers ausgeben
 	Serial.println(Ethernet.localIP());
 }
@@ -76,7 +89,7 @@ void loop()
 {
 	if (I2Cstart) // Interrupt holt die I2C Daten
 	{
-		latestData = I2Csensor1.getValues();
+		//I2CstepClient();
 		SDcreateOutput(latestData);
 		I2Cstart = false;
 	}
@@ -89,6 +102,10 @@ void loop()
 		client.stop();
 		Serial.println("client disconnected");
 	}
+}
+void I2CstepClient()
+{
+	latestData = I2Csensor1.getValues();
 }
 void ClientOutput(EthernetClient _client)
 {
