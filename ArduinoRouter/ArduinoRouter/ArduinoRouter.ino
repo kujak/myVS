@@ -32,10 +32,10 @@ EthernetServer server(80);
 // Generally, you should use "unsigned long" for variables that hold time
 // The value will quickly become too large for an int to store
 unsigned long previousMillis	= 0;        // will store last time LED was updated
-
-										 // constants won't change :
-const long	interval			= 10000;           // interval at which to blink (milliseconds)
-const int	pingDownRouterMax	= 6;
+	
+const long	interval			= 30 * 1000; // interval at which to blink (milliseconds)
+const int	pingDownRouterMax	= 4;
+const int	pingDownModemMax	= 10;
 const int	Modem				= 5;
 const int	Router				= 6;
 
@@ -46,8 +46,8 @@ int			pingDown;
 
 void setup() 
 {
-	pinMode(Modem, OUTPUT);      // sets the digital pin as output - Relais1
-	pinMode(Router, OUTPUT);      // sets the digital pin as output - Relais2
+	pinMode(Modem, OUTPUT);  // sets the digital pin as output - Relais1
+	pinMode(Router, OUTPUT); // sets the digital pin as output - Relais2
 	pinMode(7, OUTPUT);      // sets the digital pin as output - Relais3
 	pinMode(8, OUTPUT);      // sets the digital pin as output - Relais4
 
@@ -62,8 +62,8 @@ void setup()
 	// start the Ethernet connection and the server:
 	Ethernet.begin(mac, ip);
 	server.begin();
-	DEBUG_PRINT("server is at : ");
-	DEBUG_PRINT(Ethernet.localIP());
+	Serial.println("server is at : ");
+	Serial.println(Ethernet.localIP());
 }
 
 void loop()
@@ -115,7 +115,7 @@ void executePing()
 		sprintf(buffer, "Echo request failed; %d", echoReply.status);	
 	}
 
-	DEBUG_PRINT(buffer);
+	Serial.println(buffer);
 	
 	pingOK = ret;
 }
@@ -129,20 +129,23 @@ void pinReset()
 	if (pingDown >= pingDownRouterMax)
 	{
 		// did we already reset the router and have additional ping failures		
-		if (doneReset &&
-			(pingDown >= 60))
+		if (doneReset)
 		{
-			// reset the modem
-			DEBUG_PRINT("Modem reset");
-			digitalWrite(Modem, HIGH);
-			delay(100);
-			digitalWrite(Modem, LOW);
+			if (pingDown >= pingDownModemMax)
+			{
+				// reset the modem
+				Serial.println("Modem reset");
+				digitalWrite(Modem, HIGH);
+				delay(100);
+				digitalWrite(Modem, LOW);
+				pingDown = 0;
+			}
 		}
 		// max failed pings reached, reset router first
-		else if (!doneReset)
+		else 
 		{
 			// reset router
-			DEBUG_PRINT("Router reset");
+			Serial.println("Router reset");
 			digitalWrite(Router, HIGH);
 			delay(100);
 			digitalWrite(Router, LOW);
