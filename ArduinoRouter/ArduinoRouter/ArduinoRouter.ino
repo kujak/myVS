@@ -8,14 +8,22 @@
 #include <ICMPPing.h>
 #include <SPI.h>
 #include <Ethernet.h>
+// comment if no Debug Info needed
+#define DEBUG 1
 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-IPAddress ip(192, 168, 69, 7);
-IPAddress pingAddr(8, 8, 8, 8); // ip address to ping
+#ifdef DEBUG
+	#define DEBUG_PRINT(x)  Serial.println(x)
+#else
+	#define DEBUG_PRINT(x)
+#endif
 
-SOCKET pingSocket = 0;
+byte		mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+IPAddress	ip(192, 168, 69, 7);
+IPAddress	pingAddr(8, 8, 8, 8); // ip address to ping
 
-char buffer[256];
+SOCKET		pingSocket = 0;
+
+char		buffer[256];
 ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
 
 EthernetClient client;
@@ -31,10 +39,10 @@ const int	pingDownRouterMax	= 6;
 const int	Modem				= 5;
 const int	Router				= 6;
 
-boolean		pingOK				= false;
+boolean		pingOK				= true;
 boolean		doneReset			= false;
 
-int pingDown;
+int			pingDown;
 
 void setup() 
 {
@@ -54,8 +62,8 @@ void setup()
 	// start the Ethernet connection and the server:
 	Ethernet.begin(mac, ip);
 	server.begin();
-	Serial.print("server is at : ");
-	Serial.println(Ethernet.localIP());
+	DEBUG_PRINT("server is at : ");
+	DEBUG_PRINT(Ethernet.localIP());
 }
 
 void loop()
@@ -68,18 +76,18 @@ void loop()
 		previousMillis = currentMillis;
 		// test the ping connection
 		executePing();
-	}
 
-	if (!pingOK)
-	{
-		// start the reset procedure if one fail
-		reset();
-	}
-	else
-	{
-		// reset values when ping OK
-		pingDown  = 0;
-		doneReset = false;
+		if (!pingOK)
+		{
+			// start the reset procedure if one fail
+			pinReset();
+		}
+		else
+		{
+			// reset values when ping OK
+			pingDown = 0;
+			doneReset = false;
+		}
 	}
 }	
 
@@ -107,12 +115,12 @@ void executePing()
 		sprintf(buffer, "Echo request failed; %d", echoReply.status);	
 	}
 
-	Serial.println(buffer);
+	DEBUG_PRINT(buffer);
 	
 	pingOK = ret;
 }
 
-void reset()
+void pinReset()
 {
 	// increment each call of this function
 	pingDown++;
@@ -122,9 +130,10 @@ void reset()
 	{
 		// did we already reset the router and have additional ping failures		
 		if (doneReset &&
-			pingDown >= 60)
+			(pingDown >= 60))
 		{
 			// reset the modem
+			DEBUG_PRINT("Modem reset");
 			digitalWrite(Modem, HIGH);
 			delay(100);
 			digitalWrite(Modem, LOW);
@@ -133,6 +142,7 @@ void reset()
 		else if (!doneReset)
 		{
 			// reset router
+			DEBUG_PRINT("Router reset");
 			digitalWrite(Router, HIGH);
 			delay(100);
 			digitalWrite(Router, LOW);
