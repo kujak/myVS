@@ -14,11 +14,15 @@
 #define DEBUG 1
 
 #ifdef DEBUG
-	#define DEBUG_PRINTLN(x)  Serial.println(x)
-	#define DEBUG_PRINT(x) Serial.print(x);
+	#define DEBUG_PRINTLN(x)	Serial.println(x)
+	#define DEBUG_PRINTLN2(x,y) Serial.println(x,y)
+	#define DEBUG_PRINT(x)		Serial.print(x)
+	#define DEBUG_PRINT2(x,y)	Serial.print(x,y)
 #else
 	#define DEBUG_PRINT(x)
+	#define DEBUG_PRINTLN2(x,y)
 	#define DEBUG_PRINT(x)
+	#define DEBUG_PRINT2(x,y)
 #endif
 
 #define DHT11PIN 9
@@ -50,6 +54,10 @@ boolean		pingOK				= true;
 boolean		doneReset			= false;
 
 int			pingDown; // counter how often ping fails
+int			avgPing;  // average Ping time
+
+uint8_t		avgHumidity;
+uint8_t		avgTemperature;
 
 void setup() 
 {
@@ -97,69 +105,28 @@ void loop()
 			DHT11measure();
 		}
 	}
+
+	listenForEthernetClients();
 }	
-
-void DHT11measure() // measure temp and humidity when a ping was sucessfull
-{
-	DEBUG_PRINTLN("\n");
-
-	int chk = DHT11.read(DHT11PIN);
-
-	DEBUG_PRINTLN("Read sensor: ");
-	switch (chk)
-	{
-	case DHTLIB_OK:
-		DEBUG_PRINTLN("OK");
-		break;
-	case DHTLIB_ERROR_CHECKSUM:
-		DEBUG_PRINTLN("Checksum error");
-		break;
-	case DHTLIB_ERROR_TIMEOUT:
-		DEBUG_PRINTLN("Time out error");
-		break;
-	default:
-		DEBUG_PRINTLN("Unknown error");
-		break;
-	}
-
-	if (chk == DHTLIB_OK)
-	{
-		myDHT11 myDHT11calc(DHT11.temperature,DHT11.humidity);
-
-		DEBUG_PRINT("Humidity (%): ");
-		DEBUG_PRINTLN((float)DHT11.humidity, 2);
-
-		DEBUG_PRINT("Temperature (°C): ");
-		DEBUG_PRINTLN((float)DHT11.temperature, 2);
-
-		//	Serial.print("Temperature (°F): ");
-		//	Serial.println(Fahrenheit(DHT11.temperature), 2);
-
-		//	Serial.print("Temperature (°K): ");
-		//	Serial.println(Kelvin(DHT11.temperature), 2);
-
-		DEBUG_PRINT("Dew Point (°C): ");
-		DEBUG_PRINTLN(myDHT11calc.dewPoint(false));
-
-		DEBUG_PRINT("Dew PointFast (°C): ");
-		DEBUG_PRINTLN(myDHT11calc.dewPoint(true));
-	}
-}
 void executePing()
 {
 	boolean			ret;
+	int				currentPing;
 	ICMPEchoReply	echoReply = ping(pingAddr, 4);
 	
 	if (echoReply.status == SUCCESS)
 	{
 		// ping is OK
 		ret = true;
+		currentPing = millis() - echoReply.data.time;
+		avgPing = mkAvg(avgPing, currentPing);
+
 #ifdef DEBUG		
-		sprintf(buffer,
+/*		sprintf(buffer,
 			"Reply[%d] from: %d.%d.%d.%d: bytes=%d time=%ldms TTL=%d",
 			echoReply.data.seq,	echoReply.addr[0], echoReply.addr[1],
 			echoReply.addr[2], echoReply.addr[3], REQ_DATASIZE,
-			millis() - echoReply.data.time,	echoReply.ttl);
+			currentPing,	echoReply.ttl);*/
 #endif
 	}
 	else
@@ -167,11 +134,13 @@ void executePing()
 		// ping failed
 		ret = false;
 #ifdef DEBUG
-		sprintf(buffer, "Echo request failed; %d", echoReply.status);	
+//		sprintf(buffer, "Echo request failed; %d", echoReply.status);	
 #endif
 	}
 
 	DEBUG_PRINTLN(buffer);
+	DEBUG_PRINT("Avg Ping : ");
+	DEBUG_PRINTLN(avgPing);
 	
 	pingOK = ret;
 }
@@ -209,4 +178,126 @@ void pinReset()
 			doneReset = true;
 		}
 	}
+}
+void listenForEthernetClients() 
+{
+	// listen for incoming clients
+	EthernetClient client = server.available();
+	if (client) 
+	{
+		Serial.println("Got a client");
+		// an http request ends with a blank line
+		boolean currentLineIsBlank = true;
+		while (client.connected()) 
+		{
+			if (client.available()) 
+			{
+				char c = client.read();
+				// if you've gotten to the end of the line (received a newline
+				// character) and the line is blank, the http request has ended,
+				// so you can send a reply
+				if (c == '\n' && currentLineIsBlank) 
+				{
+					// send a standard http response header
+					client.println("HTTP/1.1 200 OK");
+					client.println("Content-Type: text/html");
+					client.println();
+					// print the current readings, in HTML format:
+					client.print("Temperature: ");
+					client.print(avgTemperature);
+					client.print(" degrees C");
+					client.println("<br />");
+					client.print("Humidity: " + String(avgHumidity));
+					client.print(" %");
+					client.println("<br />");
+					client.print("Ping time : " + String(avgPing));
+					client.print(" ms");
+					client.println("<br />");
+					break;
+				}
+				if (c == '\n') 
+				{
+					// you're starting a new line
+					currentLineIsBlank = true;
+				}
+				else if (c != '\r') 
+				{
+					// you've gotten a character on the current line
+					currentLineIsBlank = false;
+				}
+			}
+		}
+		// give the web browser time to receive the data
+		delay(1);
+		// close the connection:
+		client.stop();
+	}
+}
+void DHT11measure() // measure temp and humidity when a ping was sucessfull
+{
+	DEBUG_PRINTLN("\n");
+
+	int chk = DHT11.read(DHT11PIN);
+
+	DEBUG_PRINTLN("Read sensor: ");
+
+	switch (chk)
+	{
+	case DHTLIB_OK:
+		DEBUG_PRINTLN("OK");
+		break;
+	case DHTLIB_ERROR_CHECKSUM:
+		DEBUG_PRINTLN("Checksum error");
+		break;
+	case DHTLIB_ERROR_TIMEOUT:
+		DEBUG_PRINTLN("Time out error");
+		break;
+	default:
+		DEBUG_PRINTLN("Unknown error");
+		break;
+	}
+
+	if (chk == DHTLIB_OK)
+	{
+		avgTemperature = mkAvg(avgTemperature, DHT11.temperature);
+		avgHumidity = mkAvg(avgHumidity, DHT11.humidity);
+
+//		myDHT11 myDHT11calc(DHT11.temperature, DHT11.humidity);
+
+		DEBUG_PRINT("Humidity (%): ");
+		DEBUG_PRINT2((float)DHT11.humidity, 2);
+		DEBUG_PRINT(" - avg : ");
+		DEBUG_PRINTLN2((float)avgHumidity, 2);
+
+		DEBUG_PRINT("Temperature (C): ");
+		DEBUG_PRINT2((float)DHT11.temperature, 2);
+		DEBUG_PRINT(" - avg : ");
+		DEBUG_PRINTLN2((float)avgTemperature, 2);
+
+		//	Serial.print("Temperature (F): ");
+		//	Serial.println(Fahrenheit(DHT11.temperature), 2);
+
+		//	Serial.print("Temperature (K): ");
+		//	Serial.println(Kelvin(DHT11.temperature), 2);
+
+		//DEBUG_PRINT("Dew Point (C): ");
+		//DEBUG_PRINTLN(myDHT11calc.dewPoint(false));
+
+		//DEBUG_PRINT("Dew PointFast (C): ");
+		//DEBUG_PRINTLN(myDHT11calc.dewPoint(true));
+	}
+}
+uint8_t mkAvg(uint8_t _old, uint8_t _new)
+{
+	uint8_t ret;
+
+	if (_old == 0)
+	{
+		ret = _new;
+	}
+	else
+	{
+		ret = (_old + 2 * _new) / 3;
+	}
+	return ret;
 }
