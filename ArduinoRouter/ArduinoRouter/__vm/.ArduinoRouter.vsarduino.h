@@ -51,4 +51,6 @@ extern "C" void __cxa_pure_virtual() {;}
 #undef PSTR
 #define PSTR(string_literal) ((const PROGMEM char *)(string_literal))")
 #include <ArduinoRouter.ino>
+#include <myDHT11.cpp>
+#include <myDHT11.h>
 #endif

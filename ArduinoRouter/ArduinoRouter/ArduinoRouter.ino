@@ -4,6 +4,7 @@
  Author:	Kujak
 */
 
+#include "myDHT11.h"
 #include <dht11.h>
 #include <util.h>
 #include <ICMPPing.h>
@@ -11,9 +12,6 @@
 #include <Ethernet.h>
 // comment if no Debug Info needed
 #define DEBUG 1
-#define DHTLIB_OK				0
-#define DHTLIB_ERROR_CHECKSUM	-1
-#define DHTLIB_ERROR_TIMEOUT	-2
 
 #ifdef DEBUG
 	#define DEBUG_PRINTLN(x)  Serial.println(x)
@@ -37,6 +35,7 @@ ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
 EthernetClient client;
 EthernetServer server(80);
 dht11 DHT11;
+myDHT11 myDHT11;
 
 // Generally, you should use "unsigned long" for variables that hold time
 // The value will quickly become too large for an int to store
@@ -139,7 +138,8 @@ void DHT11measure() // measure temp and humidity when a ping was sucessfull
 		//	Serial.println(Kelvin(DHT11.temperature), 2);
 
 		DEBUG_PRINT("Dew Point (°C): ");
-		DEBUG_PRINTLN(dewPoint(DHT11.temperature, DHT11.humidity));
+		DEBUG_PRINTLN(myDHT11.dewPoint(DHT11.temperature, DHT11.humidity, false));
+//		DEBUG_PRINTLN(dewPoint(DHT11.temperature, DHT11.humidity));
 
 		DEBUG_PRINT("Dew PointFast (°C): ");
 		DEBUG_PRINTLN(dewPointFast(DHT11.temperature, DHT11.humidity));
@@ -235,7 +235,7 @@ double Kelvin(double celsius)
 // reference (1) : http://wahiduddin.net/calc/density_algorithms.htm
 // reference (2) : http://www.colorado.edu/geography/weather_station/Geog_site/about.htm
 //
-double dewPoint(double celsius, double humidity)
+/*double dewPoint(double celsius, double humidity)
 {
 	// (1) Saturation Vapor Pressure = ESGG(T)
 	double RATIO = 373.15 / (273.15 + celsius);
@@ -251,7 +251,7 @@ double dewPoint(double celsius, double humidity)
 	// (2) DEWPOINT = F(Vapor Pressure)
 	double T = log(VP / 0.61078);   // temp var
 	return (241.88 * T) / (17.558 - T);
-}
+}*/
 
 // delta max = 0.6544 wrt dewPoint()
 // 6.9 x faster than dewPoint()
