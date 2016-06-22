@@ -19,15 +19,19 @@
 class myDHT11
 {
 public:
-	myDHT11();
-	double Fahrenheit(double celsius);
-	int Celcius2Fahrenheit(int celcius);
-	double Kelvin(double celsius);
-	double dewPoint(double celsius, double humidity,boolean fast);
+	myDHT11(double _temp,double _humi);
+	double Fahrenheit();
+	
+	int Celcius2Fahrenheit();
+	double Kelvin();
+	double dewPoint(boolean fast);
 private:
 	int Pin;
-	double dewPointNormal(double celsius, double humidity);
-	double dewPointFast(double celsius, double humidity);
+	double temp;
+	double humi;
+
+	double dewPointNormal();
+	double dewPointFast();
 };
 #endif
 

@@ -4,40 +4,42 @@
 
 #include "myDHT11.h"
 
-myDHT11::myDHT11()
+myDHT11::myDHT11(double _temp, double _humi)
 {
+	temp = _temp;
+	humi = _humi;
 }
 
 //Celsius to Fahrenheit conversion
-double myDHT11::Fahrenheit(double celsius)
+double myDHT11::Fahrenheit()
 {
-	return 1.8 * celsius + 32;
+	return 1.8 * temp + 32;
 }
 
 // fast integer version with rounding
-int myDHT11::Celcius2Fahrenheit(int celcius)
+int myDHT11::Celcius2Fahrenheit()
 {
-  return (celcius * 18 + 5)/10 + 32;
+  return (temp * 18 + 5)/10 + 32;
 }
 
 
 //Celsius to Kelvin conversion
-double myDHT11::Kelvin(double celsius)
+double myDHT11::Kelvin()
 {
-	return celsius + 273.15;
+	return temp + 273.15;
 }
 
-double myDHT11::dewPoint(double celsius, double humidity, boolean fast)
+double myDHT11::dewPoint(boolean fast)
 {
 	double ret;
 
 	if (fast)
 	{
-		ret = dewPointFast(celsius, humidity);
+		ret = dewPointFast();
 	}
 	else
 	{
-		ret = dewPointNormal(celsius, humidity);
+		ret = dewPointNormal();
 	}
 
 	return ret;
@@ -47,10 +49,10 @@ double myDHT11::dewPoint(double celsius, double humidity, boolean fast)
 // reference (1) : http://wahiduddin.net/calc/density_algorithms.htm
 // reference (2) : http://www.colorado.edu/geography/weather_station/Geog_site/about.htm
 //
-double myDHT11::dewPointNormal(double celsius, double humidity)
+double myDHT11::dewPointNormal()
 {
 	// (1) Saturation Vapor Pressure = ESGG(T)
-	double RATIO = 373.15 / (273.15 + celsius);
+	double RATIO = 373.15 / (273.15 + temp);
 	double RHS = -7.90298 * (RATIO - 1);
 	RHS += 5.02808 * log10(RATIO);
 	RHS += -1.3816e-7 * (pow(10, (11.344 * (1 - 1 / RATIO))) - 1);
@@ -58,7 +60,7 @@ double myDHT11::dewPointNormal(double celsius, double humidity)
 	RHS += log10(1013.246);
 
 	// factor -3 is to adjust units - Vapor Pressure SVP * humidity
-	double VP = pow(10, RHS - 3) * humidity;
+	double VP = pow(10, RHS - 3) * humi;
 
 	// (2) DEWPOINT = F(Vapor Pressure)
 	double T = log(VP / 0.61078);   // temp var
@@ -68,11 +70,11 @@ double myDHT11::dewPointNormal(double celsius, double humidity)
 // delta max = 0.6544 wrt dewPoint()
 // 6.9 x faster than dewPoint()
 // reference: http://en.wikipedia.org/wiki/Dew_point
-double myDHT11::dewPointFast(double celsius, double humidity)
+double myDHT11::dewPointFast()
 {
 	double a = 17.271;
 	double b = 237.7;
-	double temp = (a * celsius) / (b + celsius) + log(humidity*0.01);
+	double temp = (a * temp) / (b + temp) + log(humi*0.01);
 	double Td = (b * temp) / (a - temp);
 	return Td;
 }
