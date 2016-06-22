@@ -9,24 +9,24 @@
       <VCCodeMacros />
     </VCCodeModel>
     <BreakPoints>
-      <BreakPoint Index="1" Name="ArduinoRouter.ino, line 84" Id="4ea57098-3c7e-4d56-96cd-8cfb80d1bf87" Enabled="1" Message="  Millis is currently {millis()}.&#xD;&#xA;Press F5 to continue.&#xD;&#xA;    Press Ctrl+F5 to stop debugging or close/stop the Serial Monitor&#xD;&#xA;  &#xD;&#xA;    The code is stopped at the start of the loop() function, where you see a red dot.&#xD;&#xA;    The red dot is a ‘breakpoint’.&#xD;&#xA;    This breakpoint is automatically set by Visual Micro to demonstrate the Arduino debugger.&#xD;&#xA;    Add your own breakpoints by placing the cursor on any code line and pressing F9. Press F9 again to delete the breakpoint.&#xD;&#xA;    Read more about the Visual Micro debugger at http://www.visualmicro.com/page/Debugging-for-Arduino.aspx&#xD;&#xA;    Take some time to learn about debugging, it’s worth it!&#xD;&#xA;    To switch the demo breakpoint and other tips off, deselect Visual Micro&gt;Tutorial Mode.&#xD;&#xA;" MessageTextType="0" PreProcessedMessage="  Millis is currently {0}.&#xD;&#xA;Press F5 to continue.&#xD;&#xA;    Press Ctrl+F5 to stop debugging or close/stop the Serial Monitor&#xD;&#xA;  &#xD;&#xA;    The code is stopped at the start of the loop() function, where you see a red dot.&#xD;&#xA;    The red dot is a ‘breakpoint’.&#xD;&#xA;    This breakpoint is automatically set by Visual Micro to demonstrate the Arduino debugger.&#xD;&#xA;    Add your own breakpoints by placing the cursor on any code line and pressing F9. Press F9 again to delete the breakpoint.&#xD;&#xA;    Read more about the Visual Micro debugger at http://www.visualmicro.com/page/Debugging-for-Arduino.aspx&#xD;&#xA;    Take some time to learn about debugging, it’s worth it!&#xD;&#xA;    To switch the demo breakpoint and other tips off, deselect Visual Micro&gt;Tutorial Mode.&#xD;&#xA;" Condition="millis()&gt;0 || millis()&gt;1" ConditionType="1" CurrentHits="0" File="n:\#tools\#git_repo\arduinorouter\arduinorouter\arduinorouter.ino" FileLine="84" FileColumn="1" FunctionName="" FunctionLineOffset="1" FunctionColumnOffset="1" HitCountTarget="250" HitCountType="4" Language="C++" LocationType="3" Tag="&lt;vmbp Id='4ea57098-3c7e-4d56-96cd-8cfb80d1bf87'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
-        <Source>77		// start the Ethernet connection and the server:
-78		Ethernet.begin(mac, ip);
-79		server.begin();
-80		DEBUG_PRINT("server is at : ");
-81		DEBUG_PRINTLN(Ethernet.localIP());
-82	}
-83	
---&gt;84	void loop()
-85	{
-86		unsigned long currentMillis = millis();
-87	
-88		if (currentMillis - previousMillis &gt;= interval)
-89		{
-90			// save the last time you blinked the LED
-91			previousMillis = currentMillis;
-92			// test the ping connection
-93			executePing();
+      <BreakPoint Index="1" Name="ArduinoRouter.ino, line 100" Id="4ea57098-3c7e-4d56-96cd-8cfb80d1bf87" Enabled="1" Message="  Millis is currently {millis()}.&#xD;&#xA;Press F5 to continue.&#xD;&#xA;    Press Ctrl+F5 to stop debugging or close/stop the Serial Monitor&#xD;&#xA;  &#xD;&#xA;    The code is stopped at the start of the loop() function, where you see a red dot.&#xD;&#xA;    The red dot is a ‘breakpoint’.&#xD;&#xA;    This breakpoint is automatically set by Visual Micro to demonstrate the Arduino debugger.&#xD;&#xA;    Add your own breakpoints by placing the cursor on any code line and pressing F9. Press F9 again to delete the breakpoint.&#xD;&#xA;    Read more about the Visual Micro debugger at http://www.visualmicro.com/page/Debugging-for-Arduino.aspx&#xD;&#xA;    Take some time to learn about debugging, it’s worth it!&#xD;&#xA;    To switch the demo breakpoint and other tips off, deselect Visual Micro&gt;Tutorial Mode.&#xD;&#xA;" MessageTextType="0" PreProcessedMessage="  Millis is currently {0}.&#xD;&#xA;Press F5 to continue.&#xD;&#xA;    Press Ctrl+F5 to stop debugging or close/stop the Serial Monitor&#xD;&#xA;  &#xD;&#xA;    The code is stopped at the start of the loop() function, where you see a red dot.&#xD;&#xA;    The red dot is a ‘breakpoint’.&#xD;&#xA;    This breakpoint is automatically set by Visual Micro to demonstrate the Arduino debugger.&#xD;&#xA;    Add your own breakpoints by placing the cursor on any code line and pressing F9. Press F9 again to delete the breakpoint.&#xD;&#xA;    Read more about the Visual Micro debugger at http://www.visualmicro.com/page/Debugging-for-Arduino.aspx&#xD;&#xA;    Take some time to learn about debugging, it’s worth it!&#xD;&#xA;    To switch the demo breakpoint and other tips off, deselect Visual Micro&gt;Tutorial Mode.&#xD;&#xA;" Condition="millis()&gt;0 || millis()&gt;1" ConditionType="1" CurrentHits="0" File="n:\#tools\#git_repo\arduinorouter\arduinorouter\arduinorouter.ino" FileLine="100" FileColumn="1" FunctionName="" FunctionLineOffset="1" FunctionColumnOffset="1" HitCountTarget="250" HitCountType="4" Language="C++" LocationType="3" Tag="&lt;vmbp Id='4ea57098-3c7e-4d56-96cd-8cfb80d1bf87'/&gt;" Type="1" ToString="System.__ComObject" BreakWhenHit="1">
+        <Source>93		DEBUG_PRINTLN(Ethernet.localIP());
+94	}
+95	void setupValues()
+96	{
+97		pingExecute();
+98		DHT11measure();
+99	}
+--&gt;100	void loop()
+101	{
+102		unsigned long currentMillis = millis();
+103	
+104		timer1Check(currentMillis);
+105	
+106		timer2Check(currentMillis);
+107	
+108		listenForEthernetClients();
+109	}	
 </Source>
         <MessageVariables>
           <MessageVariable Name="millis()" Index="1" />

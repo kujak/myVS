@@ -26,6 +26,8 @@
 #endif
 
 #define DHT11PIN 9
+#define	Modem    5 // Pin for Modem Relais
+#define	Router   6 // Pin for Router Releais
 
 byte		mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 IPAddress	ip(192, 168, 69, 7);
@@ -34,7 +36,7 @@ IPAddress	pingAddr(8, 8, 8, 8); // ip address to ping
 SOCKET		pingSocket = 0;
 
 char		buffer[256];
-ICMPPing ping(pingSocket, (uint16_t)random(0, 255));
+ICMPPing	ping(pingSocket, (uint16_t)random(0, 255));
 
 EthernetClient client;
 EthernetServer server(80);
@@ -42,13 +44,13 @@ dht11 DHT11;
 
 // Generally, you should use "unsigned long" for variables that hold time
 // The value will quickly become too large for an int to store
-unsigned long previousMillis	= 0;        // will store last time ping was executed
+unsigned long previousMillis1	= 0; // will store last time ping was executed
+unsigned long previousMillis2   = 0; // will store last time ping was executed
 	
-const long	interval			= 30 * 1000; // interval at which to test ping (milliseconds)
+const long	interval1			= 30 * 1000; // interval at which to test ping (milliseconds)
+const long	interval2			= 60 * 1000; // interval at which to test ping (milliseconds)
 const int	pingDownRouterMax	= 4; // max of not reachable Ping before Router restart
 const int	pingDownModemMax	= 10; // max of not reachable Ping before Modem restart
-const int	Modem				= 5; // Pin for Modem Relais
-const int	Router				= 6; // Pin for Router Releais
 
 boolean		pingOK				= true;
 boolean		doneReset			= false;
@@ -61,54 +63,92 @@ uint8_t		avgTemperature;
 
 void setup() 
 {
+	// Setup Relais Pins
 	pinMode(Modem, OUTPUT);  // sets the digital pin as output - Relais1
 	pinMode(Router, OUTPUT); // sets the digital pin as output - Relais2
 	pinMode(7, OUTPUT);      // sets the digital pin as output - Relais3
 	pinMode(8, OUTPUT);      // sets the digital pin as output - Relais4
 
 	// Open serial communications and wait for port to open:
+	setupSerial();
+	// start the Ethernet connection and the server:
+	setupEthernet();
+	// start all once to init the values
+	setupValues();	
+}
+void setupSerial()
+{
 	Serial.begin(9600);
 
-	while (!Serial) 
+	while (!Serial)
 	{
 		; // wait for serial port to connect. Needed for native USB port only
 	}
-
-	// start the Ethernet connection and the server:
+}
+void setupEthernet()
+{
 	Ethernet.begin(mac, ip);
 	server.begin();
 	DEBUG_PRINT("server is at : ");
 	DEBUG_PRINTLN(Ethernet.localIP());
 }
-
+void setupValues()
+{
+	pingExecute();
+	DHT11measure();
+}
 void loop()
 {
 	unsigned long currentMillis = millis();
 
-	if (currentMillis - previousMillis >= interval)
-	{
-		// save the last time you blinked the LED
-		previousMillis = currentMillis;
-		// test the ping connection
-		executePing();
+	timer1Check(currentMillis);
 
-		if (!pingOK)
-		{
-			// start the reset procedure if one fail
-			pinReset();
-		}
-		else
-		{
-			// reset values when ping OK
-			pingDown = 0;
-			doneReset = false;
-			DHT11measure();
-		}
-	}
+	timer2Check(currentMillis);
 
 	listenForEthernetClients();
 }	
-void executePing()
+void timer1Check(unsigned long _currentMillis)
+{
+	if (_currentMillis - previousMillis1 >= interval1)
+	{
+		// save the last time you blinked the LED
+		previousMillis1 = _currentMillis;
+		//execute Timer1
+		timer1();
+	}
+}
+void timer1()
+{
+	pingExecute();
+
+	// do measure only if ping is OK
+	if (!pingOK)
+	{
+		// start the reset procedure if one fail
+		pingReset();
+	}
+	else
+	{
+		// reset values when ping OK
+		pingDown = 0;
+		doneReset = false;
+	}
+}
+void timer2Check(unsigned long _currentMillis)
+{
+	if (_currentMillis - previousMillis2 >= interval2)
+	{
+		// save the last time you blinked the LED
+		previousMillis2 = _currentMillis;
+		//execute Timer2 content
+		timer2();
+	}
+}
+void timer2()
+{
+	DHT11measure();
+}
+void pingExecute()
 {
 	boolean			ret;
 	int				currentPing;
@@ -144,7 +184,7 @@ void executePing()
 	
 	pingOK = ret;
 }
-void pinReset()
+void pingReset()
 {
 	// increment each call of this function
 	pingDown++;
