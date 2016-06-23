@@ -20,8 +20,7 @@ class myDHT11
 {
 public:
 	myDHT11(double _temp,double _humi);
-	double Fahrenheit();
-	
+	double Fahrenheit();	
 	int Celcius2Fahrenheit();
 	double Kelvin();
 	double dewPoint(boolean fast);
