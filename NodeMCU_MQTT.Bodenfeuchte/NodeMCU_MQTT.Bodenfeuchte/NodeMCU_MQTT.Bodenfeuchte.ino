@@ -14,12 +14,14 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "SuEwIsWlAn";				//Hier SSID eures WLAN Netzes eintragen
-const char* password = "#My@WlaN$PasS#WorD!";	//Hier euer Passwort des WLAN Netzes eintragen
-const char* mqtt_server = "192.168.69.80";      // ioBroker MQTT Server IP
+const char* ssid = "";				//Hier SSID eures WLAN Netzes eintragen
+const char* password = "";			//Hier euer Passwort des WLAN Netzes eintragen
+const char* mqtt_server = "";		// ioBroker MQTT Server IP
 
 // define the MQTT nodes for the communication with server
 #define mqtt_Name   "NodeMCU01"
+#define mqtt_User   ""
+#define mqtt_Pwd    ""
 #define mqtt_IN     mqtt_Name"/IN"
 #define mqtt_OUT    mqtt_Name"/OUT"
 #define mqtt_1CAP   mqtt_Name"/1CAP"
@@ -160,7 +162,7 @@ void reconnect() {
 	while (!client.connected())
 	{
 		myPrint("Attempting MQTT connection...");
-		if (client.connect(mqtt_Name, "admin", "Sup3rS4ndr401"))
+		if (client.connect(mqtt_Name, mqtt_User, mqtt_Pwd))
 		{
 			myPrint("connected", true);
 			client.publish(mqtt_OUT, "connected");
