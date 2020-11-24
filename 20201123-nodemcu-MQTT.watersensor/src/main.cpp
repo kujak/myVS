@@ -95,7 +95,7 @@ unsigned int readI2CRegister16bit(int addr, int reg){                   // wire 
     return t;
 }
 void doHumiSensor(){                                                    // liest alle Sensor Daten aus dem Feuchtigkeitssensor aus und übergibt diese an den MQTT Server
-    //read capacitance register
+    //read capacitive register
     myPrint("Capacity: ");
     snprintf (msg, 75, "%d", readI2CRegister16bit(0x20, 0));
     client.publish(mqtt_1CAP, msg);
