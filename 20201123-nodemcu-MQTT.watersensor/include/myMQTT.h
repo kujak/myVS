@@ -1,0 +1,6 @@
+#define mqtt_IN     mqtt_Name"/IN"
+#define mqtt_OUT    mqtt_Name"/OUT"
+#define mqtt_1CAP   mqtt_Name"/1CAP"
+#define mqtt_2TMP   mqtt_Name"/2TMP"
+#define mqtt_3LIG   mqtt_Name"/3LIG"
+#define mqtt_9PNG   mqtt_Name"/9PNG"

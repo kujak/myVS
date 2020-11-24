@@ -17,6 +17,7 @@
 #include <Base64.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <myMQTT.h>
 
 const char* ssid         = "SuEwIsWlAn";          //Hier SSID eures WLAN Netzes eintragen
 const char* password     = "#My@WlaN$PasS#WorD!"; //Hier euer Passwort des WLAN Netzes eintragen
@@ -24,12 +25,7 @@ const char* mqtt_server  = "192.168.70.3";       // ioBroker MQTT Server IP
 
 // define the MQTT nodes for the communication with server
 #define mqtt_Name   "NodeMCU01"
-#define mqtt_IN     mqtt_Name"/IN"
-#define mqtt_OUT    mqtt_Name"/OUT"
-#define mqtt_1CAP   mqtt_Name"/1CAP"
-#define mqtt_2TMP   mqtt_Name"/2TMP"
-#define mqtt_3LIG   mqtt_Name"/3LIG"
-#define mqtt_9PNG   mqtt_Name"/9PNG"
+
 
 // compiler block removals by commenting the whole line out
 #define Humidity // comment if no Humidity Sensor attached
