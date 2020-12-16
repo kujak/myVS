@@ -26,7 +26,6 @@ const char* mqtt_server  = "192.168.70.3";       // ioBroker MQTT Server IP
 // define the MQTT nodes for the communication with server
 #define mqtt_Name   "NodeMCU01"
 
-
 // compiler block removals by commenting the whole line out
 #define Humidity // comment if no Humidity Sensor attached
 #define DEBUG    // comment if no SerialOutput required
